@@ -1,0 +1,111 @@
+# Mirrors the primary hub GitHub Pages site so installed clients keep using
+# https://samadfero.github.io/asngdajwk-plugins/ without a rebuild.
+name: Sync legacy Pages mirror
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [sync-legacy-pages]
+  schedule:
+    - cron: "15 * * * *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: legacy-pages-mirror
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Mirror primary hub site
+        env:
+          SOURCE_BASE: https://samadfero.github.io/zUChASJNDA
+        run: |
+          set -euo pipefail
+          mkdir -p hub-site/manifest hub-site/jar hub-site/icon hub-site/q8mNx hub-site/eoplite
+
+          HUB_VERSION="$(curl -fsSL "https://raw.githubusercontent.com/Samadfero/zUChASJNDA/master/runelite.version" | tr -d '\r\n')"
+          CLIENT_VERSION="$(curl -fsSL "${SOURCE_BASE}/q8mNx/version.json" | jq -r '.version // empty')"
+
+          download_manifest() {
+            local version="$1"
+            local kind="$2"
+            curl -fsSL "${SOURCE_BASE}/manifest/${version}_${kind}.js" -o "hub-site/manifest/${version}_${kind}.js"
+          }
+
+          for kind in lite full; do
+            download_manifest "${HUB_VERSION}" "${kind}"
+            if [ -n "${CLIENT_VERSION}" ] && [ "${CLIENT_VERSION}" != "${HUB_VERSION}" ]; then
+              cp "hub-site/manifest/${HUB_VERSION}_${kind}.js" "hub-site/manifest/${CLIENT_VERSION}_${kind}.js"
+            fi
+          done
+
+          python3 << 'PY'
+          import json
+          import pathlib
+          import struct
+          import urllib.request
+
+          source = "https://samadfero.github.io/zUChASJNDA"
+          root = pathlib.Path("hub-site")
+
+          def fetch(path: str) -> bytes:
+              with urllib.request.urlopen(source + path, timeout=120) as resp:
+                  return resp.read()
+
+          lite_path = sorted((root / "manifest").glob("*_lite.js"))[0]
+          data = lite_path.read_bytes()
+          siglen = struct.unpack(">I", data[:4])[0]
+          lite = json.loads(data[4 + siglen :].decode())
+
+          for jar in lite.get("jars", []):
+              name = jar["internalName"]
+              jhash = jar["jarHash"]
+              rel = f"/jar/{name}_{jhash}.jar"
+              (root / "jar" / f"{name}_{jhash}.jar").write_bytes(fetch(rel))
+
+          full_path = lite_path.with_name(lite_path.name.replace("_lite.js", "_full.js"))
+          if full_path.exists():
+              data = full_path.read_bytes()
+              siglen = struct.unpack(">I", data[:4])[0]
+              full = json.loads(data[4 + siglen :].decode())
+              for plugin in full.get("display", []):
+                  icon_hash = plugin.get("iconHash")
+                  if not icon_hash:
+                      continue
+                  internal = plugin["internalName"]
+                  rel = f"/icon/{internal}_{icon_hash}.png"
+                  dest = root / "icon" / f"{internal}_{icon_hash}.png"
+                  try:
+                      dest.write_bytes(fetch(rel))
+                  except Exception as exc:
+                      print(f"skip icon {rel}: {exc}")
+          PY
+
+          curl -fsSL "${SOURCE_BASE}/q8mNx/app.jar" -o hub-site/q8mNx/app.jar
+          curl -fsSL "${SOURCE_BASE}/q8mNx/version.json" -o hub-site/q8mNx/version.json
+
+          cp hub-site/q8mNx/app.jar hub-site/eoplite/EOPLite-client.jar
+          LEGACY_URL="https://samadfero.github.io/asngdajwk-plugins/eoplite/EOPLite-client.jar"
+          jq --arg url "${LEGACY_URL}" '.clientUrl = $url' hub-site/q8mNx/version.json > hub-site/eoplite/version.json
+
+          ls -laR hub-site
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: hub-site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
