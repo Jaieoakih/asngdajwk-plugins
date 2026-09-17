@@ -1,4 +1,4 @@
-# zUChASJNDA
+# asngdajwk-plugins
 
 Build metadata for signed plugin hub artifacts published to GitHub Pages.
 

@@ -22,7 +22,7 @@ jobs:
           fi
           if [ -z "$VERSION" ]; then
             VERSION="$(curl -fsSL -H "User-Agent: Hub-Sync" \
-              https://samadfero.github.io/zUChASJNDA/q8mNx/version.json \
+              https://samadfero.github.io/asngdajwk-plugins/q8mNx/version.json \
               | jq -r '.version // empty')"
           fi
           if [ -z "$VERSION" ]; then

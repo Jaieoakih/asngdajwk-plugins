@@ -279,9 +279,13 @@ jobs:
           else
             VERSION="$(tr -d '\n\r' < plugin-hub/runelite.version)"
           fi
-          CLIENT_URL="https://samadfero.github.io/zUChASJNDA/q8mNx/app.jar"
+          CLIENT_URL="https://samadfero.github.io/asngdajwk-plugins/q8mNx/app.jar"
           printf '{"version":"%s","sha256":"%s","clientUrl":"%s"}\n' "$VERSION" "$SHA256" "$CLIENT_URL" > hub-site/q8mNx/version.json
-          ls -la hub-site/q8mNx/
+          mkdir -p hub-site/eoplite
+          cp hub-site/q8mNx/app.jar hub-site/eoplite/EOPLite-client.jar
+          LEGACY_URL="https://samadfero.github.io/asngdajwk-plugins/eoplite/EOPLite-client.jar"
+          printf '{"version":"%s","sha256":"%s","clientUrl":"%s"}\n' "$VERSION" "$SHA256" "$LEGACY_URL" > hub-site/eoplite/version.json
+          ls -la hub-site/q8mNx/ hub-site/eoplite/
 
       - name: Stop WebDAV
         if: always()
@@ -298,13 +302,3 @@ jobs:
 
       - id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Sync legacy hub URL (installed clients)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          curl -fsSL -X POST \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/Samadfero/asngdajwk-plugins/dispatches \
-            -d '{"event_type":"sync-legacy-pages"}'
