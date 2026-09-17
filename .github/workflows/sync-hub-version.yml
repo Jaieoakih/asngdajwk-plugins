@@ -1,4 +1,4 @@
-name: Sync hub version from EOPLite release
+name: Sync hub version from client release
 
 on:
   workflow_dispatch:
@@ -12,25 +12,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Read latest EOPLite version
+      - name: Read latest client version
         id: release
         run: |
           set -euo pipefail
           VERSION=""
-          if [ -f eoplite-updates/version.json ]; then
-            VERSION="$(jq -r '.version // empty' eoplite-updates/version.json)"
+          if [ -f q8mNx/version.json ]; then
+            VERSION="$(jq -r '.version // empty' q8mNx/version.json)"
           fi
           if [ -z "$VERSION" ]; then
-            VERSION="$(curl -fsSL -H "User-Agent: EOPLite-Hub-Sync" \
-              https://samadfero.github.io/asngdajwk-plugins/eoplite/version.json \
+            VERSION="$(curl -fsSL -H "User-Agent: Hub-Sync" \
+              https://samadfero.github.io/zUChASJNDA/q8mNx/version.json \
               | jq -r '.version // empty')"
           fi
           if [ -z "$VERSION" ]; then
-            echo "::error::Could not read EOPLite version from eoplite-updates/version.json or public Pages feed"
+            echo "::error::Could not read client version from q8mNx/version.json or public Pages feed"
             exit 1
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Latest EOPLite version: $VERSION"
+          echo "Latest client version: $VERSION"
 
       - name: Bump runelite.version if needed
         run: |
@@ -42,7 +42,7 @@ jobs:
           else
             HUB_VERSION="$CLIENT_VERSION"
           fi
-          echo "EOPLite client version: $CLIENT_VERSION"
+          echo "Client version: $CLIENT_VERSION"
           echo "Hub manifest version: $HUB_VERSION"
           if [ "$CURRENT" = "$HUB_VERSION" ]; then
             echo "Hub already on $HUB_VERSION"
@@ -52,5 +52,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add runelite.version
-          git commit -m "Auto-sync hub version to RuneLite $HUB_VERSION (EOPLite $CLIENT_VERSION)"
+          git commit -m "Auto-sync hub version to $HUB_VERSION (client $CLIENT_VERSION)"
           git push origin HEAD

@@ -1,13 +1,7 @@
-# Maintainer notes (plugin sources)
+# Maintainer notes
 
-Plugin **source** is built from private repositories. This hub only stores version pins under `plugins/` and publishes **signed JARs** to Pages — not source code.
+Source repositories are private. This repo stores build pins under `plugins/` and publishes signed JARs to Pages.
 
-## Actions secret: `REPO_CREDS`
+Set Actions secret `REPO_CREDS` to `USERNAME:PAT` (classic `repo` scope or fine-grained read on each source).
 
-The build needs a GitHub PAT that can read those private sources. In **Settings → Secrets and variables → Actions**, set:
-
-`REPO_CREDS` = `YOUR_GITHUB_USERNAME:YOUR_PAT`
-
-Use a classic PAT with **`repo`** scope, or a fine-grained PAT that includes every pinned source repository.
-
-Then run **Build EOPLite Plugin Hub** (workflow_dispatch).
+Then run **Build hub** (workflow_dispatch).

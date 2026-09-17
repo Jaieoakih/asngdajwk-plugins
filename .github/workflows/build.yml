@@ -1,16 +1,16 @@
-# Builds EOPLite hub plugins and publishes to GitHub Pages when enabled.
+# Builds hub plugins and publishes to GitHub Pages when enabled.
 #
-# Secrets:  EOPLITE_SIGNING_KEY (full eoplite-signing-key.pem)
+# Secrets:  EOPLITE_SIGNING_KEY (signing key PEM)
 # Variables: ENABLE_PUBLIC_PAGES = true
 
-name: Build EOPLite Plugin Hub
+name: Build hub
 
 on:
   push:
     branches: [master, main]
   workflow_dispatch:
   repository_dispatch:
-    types: [eoplite-client-release]
+    types: [client-release, eoplite-client-release]
 
 permissions:
   contents: read
@@ -18,7 +18,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: asngdajwk-plugins-deploy
+  group: zuchasjnda-deploy
   cancel-in-progress: true
 
 jobs:
@@ -52,7 +52,7 @@ jobs:
           path: |
             ~/.gradle/caches/
             api/
-          key: eoplite-hub-deps-${{ hashFiles('plugin-hub/runelite.version', 'bundle.tar.zst') }}
+          key: hub-deps-${{ hashFiles('plugin-hub/runelite.version', 'bundle.tar.zst') }}
 
       - name: Prepare API cache
         if: steps.cache-deps.outputs.cache-hit != 'true'
@@ -239,13 +239,13 @@ jobs:
           ls -laR hub-site
           test -f hub-site/manifest/$(cat plugin-hub/runelite.version | tr -d '\n\r')_lite.js
 
-      - name: Publish EOPLite client version manifest aliases
+      - name: Publish client version manifest aliases
         run: |
           set -euo pipefail
           HUB_VERSION="$(tr -d '\n\r' < plugin-hub/runelite.version)"
           CLIENT_VERSION=""
-          if [ -f plugin-hub/eoplite-updates/version.json ]; then
-            CLIENT_VERSION="$(jq -r '.version // empty' plugin-hub/eoplite-updates/version.json)"
+          if [ -f plugin-hub/q8mNx/version.json ]; then
+            CLIENT_VERSION="$(jq -r '.version // empty' plugin-hub/q8mNx/version.json)"
           fi
           if [ -n "$CLIENT_VERSION" ] && [ "$CLIENT_VERSION" != "$HUB_VERSION" ]; then
             cp "hub-site/manifest/${HUB_VERSION}_lite.js" "hub-site/manifest/${CLIENT_VERSION}_lite.js"
@@ -253,30 +253,35 @@ jobs:
             echo "Published manifest aliases: ${HUB_VERSION} -> ${CLIENT_VERSION}"
             ls -la "hub-site/manifest/${CLIENT_VERSION}"_*.js
           else
-            echo "No EOPLite client manifest alias needed (${CLIENT_VERSION:-none})"
+            echo "No client manifest alias needed (${CLIENT_VERSION:-none})"
           fi
 
-      - name: Publish EOPLite client update feed
+      - name: Publish client update feed
         run: |
           set -euo pipefail
-          SRC="plugin-hub/eoplite-updates"
-          if [ ! -f "${SRC}/EOPLite-client.jar" ]; then
-            echo "::warning::Missing ${SRC}/EOPLite-client.jar — skipping /eoplite/ on Pages for now."
-            echo "Run client publish-release workflow to push client files here."
+          SRC="plugin-hub/q8mNx"
+          CLIENT_SRC=""
+          if [ -f "${SRC}/app.jar" ]; then
+            CLIENT_SRC="${SRC}/app.jar"
+          elif [ -f "${SRC}/EOPLite-client.jar" ]; then
+            CLIENT_SRC="${SRC}/EOPLite-client.jar"
+          fi
+          if [ -z "${CLIENT_SRC}" ]; then
+            echo "::warning::Missing client JAR in ${SRC} — skipping client feed on Pages."
             exit 0
           fi
 
-          mkdir -p hub-site/eoplite
-          cp "${SRC}/EOPLite-client.jar" hub-site/eoplite/
-          SHA256="$(sha256sum hub-site/eoplite/EOPLite-client.jar | awk '{print $1}')"
+          mkdir -p hub-site/q8mNx
+          cp "${CLIENT_SRC}" hub-site/q8mNx/app.jar
+          SHA256="$(sha256sum hub-site/q8mNx/app.jar | awk '{print $1}')"
           if [ -f "${SRC}/version.json" ]; then
             VERSION="$(jq -r .version "${SRC}/version.json")"
           else
             VERSION="$(tr -d '\n\r' < plugin-hub/runelite.version)"
           fi
-          CLIENT_URL="https://samadfero.github.io/asngdajwk-plugins/eoplite/EOPLite-client.jar"
-          printf '{"version":"%s","sha256":"%s","clientUrl":"%s"}\n' "$VERSION" "$SHA256" "$CLIENT_URL" > hub-site/eoplite/version.json
-          ls -la hub-site/eoplite/
+          CLIENT_URL="https://samadfero.github.io/zUChASJNDA/q8mNx/app.jar"
+          printf '{"version":"%s","sha256":"%s","clientUrl":"%s"}\n' "$VERSION" "$SHA256" "$CLIENT_URL" > hub-site/q8mNx/version.json
+          ls -la hub-site/q8mNx/
 
       - name: Stop WebDAV
         if: always()

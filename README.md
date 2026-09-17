@@ -1,5 +1,5 @@
-# EOPLite plugin hub (build)
+# zUChASJNDA
 
-This repository drives signed EOPLite plugin hub builds. Published artifacts are served via GitHub Pages for EOPLite clients.
+Build metadata for signed plugin hub artifacts published to GitHub Pages.
 
-Maintainers: use **Actions → Build EOPLite Plugin Hub** to build and deploy.
+Maintainers: run the **Build hub** workflow.
