@@ -284,6 +284,8 @@ jobs:
           kill "$(cat /tmp/rclone-webdav.pid)" 2>/dev/null || true
 
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
