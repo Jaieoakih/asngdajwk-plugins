@@ -86,9 +86,9 @@ jobs:
             repo_path="${repo#https://github.com/}"
             repo_path="${repo_path#http://github.com/}"
             repo_path="${repo_path%.git}"
-            echo "Checking ${plugin} -> github.com/${repo_path} @ ${commit}"
+            echo "Checking plugin pin: ${plugin} @ ${commit:0:12}"
             if ! git ls-remote "https://${CREDS}@github.com/${repo_path}.git" "${commit}" >/dev/null 2>&1; then
-              echo "::error::Cannot access private plugin repo for '${plugin}' (github.com/${repo_path}). Your REPO_CREDS secret must be Samadfero:ghp_xxx using a classic PAT with 'repo' scope, OR a fine-grained PAT that explicitly includes ${repo_path} (new private repos are often missing)."
+              echo "::error::Cannot access source repo for plugin '${plugin}'. Set REPO_CREDS (username:PAT with read access to pinned private sources)."
               exit 1
             fi
           done
@@ -115,7 +115,7 @@ jobs:
           fi
           java -XX:+UseParallelGC -cp package.jar net.runelite.pluginhub.packager.Packager
           if [ ! -d /tmp/jars ] || [ -z "$(find /tmp/jars -name '*.jar' -print -quit)" ]; then
-            echo "::error::No plugin JARs were built. Private plugin repos need secret REPO_CREDS = Samadfero:ghp_YOUR_TOKEN (classic PAT, repo scope)."
+            echo "::error::No plugin JARs were built. Set REPO_CREDS if sources are private."
             exit 1
           fi
           BUILT_JARS=$(find /tmp/jars -name '*.jar' | wc -l)
@@ -262,7 +262,7 @@ jobs:
           SRC="plugin-hub/eoplite-updates"
           if [ ! -f "${SRC}/EOPLite-client.jar" ]; then
             echo "::warning::Missing ${SRC}/EOPLite-client.jar — skipping /eoplite/ on Pages for now."
-            echo "Run eop-lite publish-release (needs PLUGIN_HUB_DISPATCH_TOKEN on Samadfero/eop-lite) to push client files here."
+            echo "Run client publish-release workflow to push client files here."
             exit 0
           fi
 
