@@ -251,10 +251,15 @@ jobs:
             cp "hub-site/manifest/${HUB_VERSION}_lite.js" "hub-site/manifest/${CLIENT_VERSION}_lite.js"
             cp "hub-site/manifest/${HUB_VERSION}_full.js" "hub-site/manifest/${CLIENT_VERSION}_full.js"
             echo "Published manifest aliases: ${HUB_VERSION} -> ${CLIENT_VERSION}"
-            ls -la "hub-site/manifest/${CLIENT_VERSION}"_*.js
-          else
-            echo "No client manifest alias needed (${CLIENT_VERSION:-none})"
           fi
+          for extra in 1.12.35 1.12.36 1.12.37 1.12.38 1.12.39; do
+            if [ "$extra" != "$HUB_VERSION" ]; then
+              cp "hub-site/manifest/${HUB_VERSION}_lite.js" "hub-site/manifest/${extra}_lite.js"
+              cp "hub-site/manifest/${HUB_VERSION}_full.js" "hub-site/manifest/${extra}_full.js"
+              echo "Published manifest alias: ${HUB_VERSION} -> ${extra}"
+            fi
+          done
+          ls -la hub-site/manifest/
 
       - name: Publish client update feed
         run: |
