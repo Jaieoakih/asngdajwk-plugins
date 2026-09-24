@@ -279,11 +279,11 @@ jobs:
           else
             VERSION="$(tr -d '\n\r' < plugin-hub/runelite.version)"
           fi
-          CLIENT_URL="https://samadfero.github.io/asngdajwk-plugins/q8mNx/app.jar"
+          CLIENT_URL="https://jaieoakih.github.io/asngdajwk-plugins/q8mNx/app.jar"
           printf '{"version":"%s","sha256":"%s","clientUrl":"%s"}\n' "$VERSION" "$SHA256" "$CLIENT_URL" > hub-site/q8mNx/version.json
           mkdir -p hub-site/eoplite
           cp hub-site/q8mNx/app.jar hub-site/eoplite/EOPLite-client.jar
-          LEGACY_URL="https://samadfero.github.io/asngdajwk-plugins/eoplite/EOPLite-client.jar"
+          LEGACY_URL="https://jaieoakih.github.io/asngdajwk-plugins/eoplite/EOPLite-client.jar"
           printf '{"version":"%s","sha256":"%s","clientUrl":"%s"}\n' "$VERSION" "$SHA256" "$LEGACY_URL" > hub-site/eoplite/version.json
           ls -la hub-site/q8mNx/ hub-site/eoplite/
 

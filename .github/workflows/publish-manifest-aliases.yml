@@ -34,7 +34,7 @@ jobs:
       - name: Mirror current Pages site
         run: |
           set -euo pipefail
-          BASE="https://samadfero.github.io/asngdajwk-plugins"
+          BASE="https://jaieoakih.github.io/asngdajwk-plugins"
           mkdir -p hub-site/manifest hub-site/jar hub-site/icon hub-site/q8mNx
           curl -fsSL "${BASE}/manifest/${{ inputs.source_version }}_lite.js" -o "hub-site/manifest/${{ inputs.source_version }}_lite.js"
           curl -fsSL "${BASE}/manifest/${{ inputs.source_version }}_full.js" -o "hub-site/manifest/${{ inputs.source_version }}_full.js"
@@ -64,7 +64,7 @@ jobs:
           import struct
           import urllib.request
 
-          base = "https://samadfero.github.io/asngdajwk-plugins"
+          base = "https://jaieoakih.github.io/asngdajwk-plugins"
           manifest_path = pathlib.Path("hub-site/manifest/${{ inputs.source_version }}_lite.js")
           data = manifest_path.read_bytes()
           siglen = struct.unpack(">I", data[:4])[0]
